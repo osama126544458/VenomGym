@@ -5,73 +5,83 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VENOM GYM - وحوش الفينوم 👑</title>
     <style>
-        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; }
-        body { font-family: sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; text-align: center; }
-        .logo { font-size: 28px; font-weight: bold; color: var(--main-color); margin-bottom: 5px; text-transform: uppercase; border-bottom: 2px solid var(--main-color); display: inline-block; padding-bottom: 5px; }
-        .dev-info { font-size: 12px; color: #666; margin-bottom: 20px; display: block; }
-        .search-box { background: var(--card-bg); padding: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; --wa-color: #25d366; }
+        body { font-family: sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; text-align: center; min-height: 100vh; display: flex; flex-direction: column; }
+        .content-wrap { flex: 1; }
+        .logo { font-size: 28px; font-weight: bold; color: var(--main-color); margin-bottom: 25px; text-transform: uppercase; border-bottom: 2px solid var(--main-color); display: inline-block; padding-bottom: 5px; }
+        .search-box { background: var(--card-bg); padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.6); border: 1px solid #333; }
         h3 { margin-top: 0; color: #eee; }
-        input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #333; background: #222; color: white; font-size: 18px; box-sizing: border-box; text-align: center; outline: none; }
-        button { background: var(--main-color); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 15px; transition: 0.3s; }
-        .result-card { display: none; margin-top: 25px; background: var(--card-bg); padding: 20px; border-radius: 15px; border-top: 4px solid var(--main-color); text-align: right; animation: fadeIn 0.5s; }
-        .info-group { margin-bottom: 15px; padding: 10px; background: #252525; border-radius: 8px; }
+        input { width: 100%; padding: 15px; border-radius: 10px; border: 1px solid #444; background: #222; color: white; font-size: 18px; box-sizing: border-box; text-align: center; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--main-color); box-shadow: 0 0 10px rgba(255, 71, 87, 0.3); }
+        button.main-btn { background: var(--main-color); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-size: 18px; font-weight: bold; margin-top: 15px; transition: 0.3s; }
+        .result-card { display: none; margin-top: 25px; background: var(--card-bg); padding: 20px; border-radius: 15px; border-top: 4px solid var(--main-color); text-align: right; animation: fadeIn 0.5s; border: 1px solid #333; }
+        .info-group { margin-bottom: 15px; padding: 12px; background: #252525; border-radius: 10px; border-right: 3px solid var(--main-color); }
         .info-label { color: var(--main-color); font-weight: bold; font-size: 14px; display: block; margin-bottom: 5px; }
-        .info-text { font-size: 17px; line-height: 1.6; white-space: pre-wrap; }
-        .whatsapp-btn { background: #25d366; margin-top: 10px; display: block; text-decoration: none; color: white; padding: 10px; border-radius: 8px; font-weight: bold; font-size: 14px; }
+        .info-text { font-size: 17px; line-height: 1.6; white-space: pre-wrap; color: #ddd; }
+        
+        /* تصميم قسم المبرمج الاحترافي */
+        .dev-footer { margin-top: 50px; padding: 20px; border: 1px dashed #444; border-radius: 20px; background: rgba(255,255,255,0.02); }
+        .dev-name { font-size: 15px; color: #888; margin-bottom: 12px; display: block; letter-spacing: 1px; }
+        .wa-btn { background: var(--wa-color); color: white; text-decoration: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 15px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.2); }
+        .wa-btn:active { transform: scale(0.95); }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div class="logo">VENOM GYM 👑</div>
-    <span class="dev-info">تصميم المبرمج: أسامة قنديل</span>
+    <div class="content-wrap">
+        <div class="logo">VENOM GYM 👑</div>
 
-    <div id="loginBox" class="search-box">
-        <h3>أهلاً بك يا بطل 🔥</h3>
-        <p style="color: #888; font-size: 14px;">سجل اسمك مرة واحدة لمتابعة برنامجك</p>
-        <input type="text" id="clientName" placeholder="اكتب اسمك هنا...">
-        <button onclick="checkPlan()">دخول 🚀</button>
+        <div id="loginBox" class="search-box">
+            <h3>دخول الأبطال 🔥</h3>
+            <p style="color: #888; font-size: 14px; margin-bottom: 20px;">سجل اسمك مرة واحدة فقط</p>
+            <input type="text" id="clientName" placeholder="اكتب اسمك هنا...">
+            <button class="main-btn" onclick="checkPlan()">عرض برنامجي 🚀</button>
+        </div>
+
+        <div id="resultCard" class="result-card">
+            <h2 id="userNameDisplay" style="text-align:center; color: var(--main-color); margin-top: 0;"></h2>
+            
+            <div class="info-group">
+                <span class="info-label">🥗 نظام التغذية الخاص بك:</span>
+                <div id="foodDisplay" class="info-text"></div>
+            </div>
+
+            <div class="info-group">
+                <span class="info-label">💪 برنامج التمرين اليومي:</span>
+                <div id="gymDisplay" class="info-text"></div>
+            </div>
+            
+            <button onclick="logout()" style="background: transparent; color: #666; border: 1px solid #444; padding: 10px; width: 100%; border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 10px;">تبديل الحساب 🔄</button>
+        </div>
     </div>
 
-    <div id="resultCard" class="result-card">
-        <h2 id="userNameDisplay" style="text-align:center; color: var(--main-color);"></h2>
-        
-        <div class="info-group">
-            <span class="info-label">🥗 نظام التغذية:</span>
-            <div id="foodDisplay" class="info-text"></div>
-        </div>
-
-        <div class="info-group">
-            <span class="info-label">💪 برنامج التمرين:</span>
-            <div id="gymDisplay" class="info-text"></div>
-        </div>
-        
-        <button onclick="logout()" style="background: #444; font-size: 14px;">تغيير الحساب 🔄</button>
-        
-        <a href="https://wa.me/201012345678" target="_blank" class="whatsapp-btn">تواصل مع الكابتن (واتساب) 💬</a>
-        
-        <p style="text-align:center; color: #666; font-size: 12px; margin-top: 20px;">تصميم أسامة قنديل</p>
+    <div class="dev-footer">
+        <span class="dev-name">بواسطة المبرمج: أسامة قنديل</span>
+        <a href="https://wa.me/201032161614" target="_blank" class="wa-btn">
+            للتواصل مع المبرمج واتساب 💬
+        </a>
     </div>
 
     <script>
         const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
 
-        // فحص إذا كان المستخدم مسجل دخول من قبل
         window.onload = function() {
             const savedName = localStorage.getItem('gymUserName');
             if (savedName) {
                 document.getElementById('clientName').value = savedName;
-                checkPlan(true); // دخول تلقائي
+                checkPlan(true);
             }
         };
 
         async function checkPlan(isAuto = false) {
             const name = document.getElementById('clientName').value.trim();
-            const resultCard = document.getElementById('resultCard');
+            const resultBox = document.getElementById('resultCard');
             const loginBox = document.getElementById('loginBox');
 
             if (!name) {
-                alert("من فضلك اكتب اسمك!");
+                if(!isAuto) alert("من فضلك ادخل اسمك يا بطل!");
                 return;
             }
 
@@ -80,21 +90,19 @@
                 const data = await res.json();
 
                 if (data) {
-                    // حفظ الاسم في ذاكرة المتصفح
                     localStorage.setItem('gymUserName', name);
+                    document.getElementById('userNameDisplay').innerText = `وحش الفينوم: ${name}`;
+                    document.getElementById('foodDisplay').innerText = data.foodPlan || "جاري تجهيز نظامك الغذائي..";
+                    document.getElementById('gymDisplay').innerText = data.gymPlan || "جاري تجهيز تمرينك..";
                     
-                    document.getElementById('userNameDisplay').innerText = `البطل: ${name}`;
-                    document.getElementById('foodDisplay').innerText = data.foodPlan || "لم يتم تحديد نظام غذائي بعد.";
-                    document.getElementById('gymDisplay').innerText = data.gymPlan || "لم يتم تحديد برنامج تمرين بعد.";
-                    
-                    resultCard.style.display = 'block';
+                    resultBox.style.display = 'block';
                     loginBox.style.display = 'none';
                 } else {
-                    if(!isAuto) alert("الاسم غير موجود.. تأكد من كتابة اسمك بشكل صحيح.");
+                    if(!isAuto) alert("الاسم غير مسجل.. راجع الكابتن لتفعيل حسابك.");
                     localStorage.removeItem('gymUserName');
                 }
             } catch (error) {
-                console.error(error);
+                console.error("Error:", error);
             }
         }
 
@@ -105,3 +113,4 @@
     </script>
 </body>
 </html>
+

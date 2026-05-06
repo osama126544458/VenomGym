@@ -3,160 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم فينوم جيم 👑</title>
+    <title>لوحة إدارة فينوم جيم 👑</title>
     <style>
-        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; --success: #2ed573; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; }
-        .logo { font-size: 24px; font-weight: bold; color: var(--main-color); margin-bottom: 20px; border-bottom: 2px solid var(--main-color); display: inline-block; }
+        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 0; }
         
-        .card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        h3 { margin-top: 0; border-right: 4px solid var(--main-color); padding-right: 10px; }
-        
-        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--main-color); }
-        
-        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
-        .btn-add { background: var(--main-color); color: white; padding: 15px; width: 100%; font-size: 18px; }
-        .btn-save { background: var(--success); color: white; padding: 10px 20px; margin-top: 10px; }
-        .btn-cancel { background: #555; color: white; padding: 10px 20px; margin-right: 10px; }
+        /* شريط التنقل العلوي */
+        .navbar { background: var(--card-bg); display: flex; justify-content: space-around; padding: 15px; border-bottom: 2px solid var(--main-color); position: sticky; top: 0; z-index: 100; }
+        .nav-btn { color: #aaa; text-decoration: none; font-weight: bold; font-size: 14px; cursor: pointer; transition: 0.3s; }
+        .nav-btn.active { color: var(--main-color); border-bottom: 2px solid var(--main-color); padding-bottom: 5px; }
 
-        .search-bar { position: sticky; top: 0; z-index: 10; background: var(--bg-dark); padding: 10px 0; }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .page { display: none; } /* إخفاء كل الصفحات افتراضياً */
+        .page.active { display: block; } /* إظهار الصفحة النشطة فقط */
+
+        h2 { border-right: 4px solid var(--main-color); padding-right: 10px; margin-bottom: 25px; }
+        input, textarea { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #222; color: white; font-size: 16px; box-sizing: border-box; }
         
-        .user-item { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
-        .user-item:hover { background: #333; transform: scale(1.02); }
-        
-        .edit-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 100; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .delete-section { margin-top: 40px; border-top: 1px solid #444; padding-top: 20px; }
-        .btn-delete { background: #b33939; color: white; padding: 10px; width: 100%; }
+        button.action-btn { background: var(--main-color); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 17px; }
+
+        /* ستايل قائمة الأعضاء */
+        .user-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #333; }
+        .user-card:active { transform: scale(0.98); }
+
+        /* شاشة التعديل المنفصلة */
+        .edit-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 200; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="logo">VENOM GYM ADMIN 👑</div>
-
-    <div class="card">
-        <h3>إضافة وحش جديد 🔥</h3>
-        <input type="text" id="newName" placeholder="اسم المتدرب بالكامل">
-        <textarea id="newFood" placeholder="نظام التغذية..." rows="3"></textarea>
-        <textarea id="newGym" placeholder="برنامج التمرين..." rows="3"></textarea>
-        <button class="btn-add" onclick="addUser()">إضافة للعضويات 💾</button>
+    <div class="navbar">
+        <div class="nav-btn active" id="navAdd" onclick="showPage('addPage')">➕ إضافة مشترك</div>
+        <div class="nav-btn" id="navMembers" onclick="showPage('membersPage')">👥 قائمة المشتركين</div>
     </div>
 
-    <div class="search-bar">
-        <input type="text" id="searchInp" placeholder="🔍 ابحث بالاسم عن أي بطل..." oninput="filterUsers()">
-    </div>
-
-    <div id="usersList">
-        <p style="text-align:center; color:#666;">جاري تحميل الأبطال...</p>
-    </div>
-</div>
-
-<div id="editScreen" class="edit-screen">
     <div class="container">
-        <button class="btn-cancel" onclick="closeEdit()" style="margin-bottom: 20px;">⬅️ رجوع للقائمة</button>
-        <div class="card">
-            <h3>تعديل بيانات: <span id="editingTitle" style="color:var(--main-color)"></span></h3>
-            <label>نظام التغذية:</label>
-            <textarea id="editFood" rows="6"></textarea>
-            <label>برنامج التمرين:</label>
-            <textarea id="editGym" rows="6"></textarea>
-            <button class="btn-save" onclick="updateUser()">حفظ التعديلات ✅</button>
-        </div>
-
-        <div class="delete-section">
-            <button class="btn-delete" onclick="deleteUser()">حذف العضو نهائياً 🗑️</button>
-        </div>
-    </div>
-</div>
-
-<script>
-    const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
-    let allUsers = {};
-    let currentEditingName = "";
-
-    // 1. جلب البيانات
-    async function loadUsers() {
-        try {
-            const res = await fetch(`${dbURL}.json`);
-            allUsers = await res.json() || {};
-            renderList(allUsers);
-        } catch (e) { console.error(e); }
-    }
-
-    // 2. عرض القائمة
-    function renderList(users) {
-        const list = document.getElementById('usersList');
-        list.innerHTML = '';
-        Object.keys(users).forEach(name => {
-            const div = document.createElement('div');
-            div.className = 'user-item';
-            div.onclick = () => openEdit(name);
-            div.innerHTML = `<span>👤 ${name}</span> <span>⚙️</span>`;
-            list.appendChild(div);
-        });
-    }
-
-    // 3. البحث
-    function filterUsers() {
-        const term = document.getElementById('searchInp').value.toLowerCase();
-        const filtered = {};
-        Object.keys(allUsers).forEach(name => {
-            if(name.toLowerCase().includes(term)) filtered[name] = allUsers[name];
-        });
-        renderList(filtered);
-    }
-
-    // 4. إضافة بطل جديد
-    async function addUser() {
-        const name = document.getElementById('newName').value.trim();
-        const food = document.getElementById('newFood').value.trim();
-        const gym = document.getElementById('newGym').value.trim();
-        if(!name) return alert("دخل الاسم الأول!");
         
-        await fetch(`${dbURL}/${name}.json`, {
-            method: 'PUT',
-            body: JSON.stringify({ foodPlan: food, gymPlan: gym })
-        });
-        alert("تمت الإضافة بنجاح!");
-        location.reload();
-    }
+        <div id="addPage" class="page active">
+            <h2>إضافة بطل جديد 🔥</h2>
+            <input type="text" id="newName" placeholder="اسم المشترك (مثلاً: محمد أحمد)">
+            <textarea id="newFood" placeholder="نظام التغذية..." rows="4"></textarea>
+            <textarea id="newGym" placeholder="برنامج التمرين..." rows="4"></textarea>
+            <button class="action-btn" onclick="saveNewUser()">حفظ ونشر البيانات 💾</button>
+        </div>
 
-    // 5. فتح شاشة التعديل
-    function openEdit(name) {
-        currentEditingName = name;
-        document.getElementById('editingTitle').innerText = name;
-        document.getElementById('editFood').value = allUsers[name].foodPlan || "";
-        document.getElementById('editGym').value = allUsers[name].gymPlan || "";
-        document.getElementById('editScreen').style.display = 'block';
-    }
+        <div id="membersPage" class="page">
+            <h2>المشتركين الحاليين 👥</h2>
+            <input type="text" id="searchBar" placeholder="🔍 ابحث بالاسم (مثلاً: محمد)..." oninput="searchUsers()">
+            <div id="usersList" style="margin-top: 20px;">
+                <p style="color:#666; text-align:center;">جاري تحميل البيانات...</p>
+            </div>
+        </div>
 
-    function closeEdit() { document.getElementById('editScreen').style.display = 'none'; }
+    </div>
 
-    // 6. تحديث البيانات
-    async function updateUser() {
-        const food = document.getElementById('editFood').value;
-        const gym = document.getElementById('editGym').value;
-        await fetch(`${dbURL}/${currentEditingName}.json`, {
-            method: 'PATCH',
-            body: JSON.stringify({ foodPlan: food, gymPlan: gym })
-        });
-        alert("تم التحديث!");
-        loadUsers();
-        closeEdit();
-    }
+    <div id="editOverlay" class="edit-overlay">
+        <button onclick="closeEdit()" style="background:#444; color:white; border:none; padding:10px; border-radius:5px; margin-bottom:20px;">⬅️ العودة للقائمة</button>
+        <h2>تعديل بيانات: <span id="editingNameDisplay" style="color:var(--main-color)"></span></h2>
+        
+        <label>🥗 نظام التغذية:</label>
+        <textarea id="editFood" rows="6"></textarea>
+        
+        <label>💪 برنامج التمرين:</label>
+        <textarea id="editGym" rows="6"></textarea>
 
-    // 7. حذف عضو
-    async function deleteUser() {
-        if(confirm(`هل تريد حذف ${currentEditingName} نهائياً؟`)) {
-            await fetch(`${dbURL}/${currentEditingName}.json`, { method: 'DELETE' });
-            alert("تم الحذف!");
-            location.reload();
+        <button class="action-btn" onclick="updateUser()" style="background:#2ed573; margin-top:20px;">تحديث البيانات ✅</button>
+        <button class="action-btn" onclick="deleteUser()" style="background:#ff4757; margin-top:10px;">حذف العضو نهائياً 🗑️</button>
+    </div>
+
+    <script>
+        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
+        let allUsersData = {};
+        let currentEditing = "";
+
+        // وظيفة التنقل بين الصفحات
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            if(pageId === 'addPage') document.getElementById('navAdd').classList.add('active');
+            if(pageId === 'membersPage') {
+                document.getElementById('navMembers').classList.add('active');
+                loadUsersList();
+            }
         }
-    }
 
-    loadUsers();
-</script>
+        // حفظ عضو جديد
+        async function saveNewUser() {
+            const name = document.getElementById('newName').value.trim();
+            const food = document.getElementById('newFood').value.trim();
+            const gym = document.getElementById('newGym').value.trim();
+            if(!name) return alert("الاسم مطلوب!");
+
+            await fetch(`${dbURL}/${name}.json`, {
+                method: 'PUT',
+                body: JSON.stringify({ foodPlan: food, gymPlan: gym })
+            });
+            alert("تمت الإضافة بنجاح!");
+            document.getElementById('newName').value = '';
+            document.getElementById('newFood').value = '';
+            document.getElementById('newGym').value = '';
+            showPage('membersPage');
+        }
+
+        // تحميل قائمة الأعضاء
+        async function loadUsersList() {
+            const res = await fetch(`${dbURL}.json`);
+            allUsersData = await res.json() || {};
+            displayUsers(allUsersData);
+        }
+
+        // عرض الأعضاء
+        function displayUsers(data) {
+            const list = document.getElementById('usersList');
+            list.innerHTML = '';
+            Object.keys(data).forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'user-card';
+                div.onclick = () => openEdit(name);
+                div.innerHTML = `<span>👤 ${name}</span> <span style="color:#666">تعديل ></span>`;
+                list.appendChild(div);
+            });
+        }
+
+        // البحث الذكي
+        function searchUsers() {
+            const term = document.getElementById('searchBar').value.toLowerCase();
+            const filtered = {};
+            Object.keys(allUsersData).forEach(name => {
+                if(name.toLowerCase().includes(term)) filtered[name] = allUsersData[name];
+            });
+            displayUsers(filtered);
+        }
+
+        // فتح شاشة التعديل
+        function openEdit(name) {
+            currentEditing = name;
+            document.getElementById('editingNameDisplay').innerText = name;
+            document.getElementById('editFood').value = allUsersData[name].foodPlan || "";
+            document.getElementById('editGym').value = allUsersData[name].gymPlan || "";
+            document.getElementById('editOverlay').style.display = 'block';
+        }
+
+        function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; }
+
+        // تحديث بيانات
+        async function updateUser() {
+            const food = document.getElementById('editFood').value;
+            const gym = document.getElementById('editGym').value;
+            await fetch(`${dbURL}/${currentEditing}.json`, {
+                method: 'PATCH',
+                body: JSON.stringify({ foodPlan: food, gymPlan: gym })
+            });
+            alert("تم التحديث!");
+            loadUsersList();
+            closeEdit();
+        }
+
+        // حذف عضو
+        async function deleteUser() {
+            if(confirm(`حذف ${currentEditing}؟ لا يمكن التراجع!`)) {
+                await fetch(`${dbURL}/${currentEditing}.json`, { method: 'DELETE' });
+                alert("تم الحذف!");
+                loadUsersList();
+                closeEdit();
+            }
+        }
+    </script>
 </body>
 </html>

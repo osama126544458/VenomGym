@@ -3,95 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة وحوش الفينوم 👑</title>
+    <title>لوحة تحكم فينوم جيم 👑</title>
     <style>
-        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; }
-        body { font-family: sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; text-align: center; }
-        .admin-box { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; }
-        button { background: var(--main-color); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .user-list { text-align: right; margin-top: 30px; }
-        .user-item { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-right: 4px solid var(--main-color); }
-        .delete-btn { background: #555; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 12px; transition: 0.3s; width: auto; margin: 0; }
-        .delete-btn:hover { background: #ff4757; }
-        .user-info { flex-grow: 1; margin-left: 10px; }
+        :root { --main-color: #ff4757; --bg-dark: #0a0a0a; --card-bg: #1a1a1a; --success: #2ed573; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-dark); color: white; margin: 0; padding: 20px; }
+        .container { max-width: 600px; margin: auto; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--main-color); margin-bottom: 20px; border-bottom: 2px solid var(--main-color); display: inline-block; }
+        
+        .card { background: var(--card-bg); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        h3 { margin-top: 0; border-right: 4px solid var(--main-color); padding-right: 10px; }
+        
+        input, textarea { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #444; background: #222; color: white; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--main-color); }
+        
+        button { cursor: pointer; border: none; border-radius: 8px; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: var(--main-color); color: white; padding: 15px; width: 100%; font-size: 18px; }
+        .btn-save { background: var(--success); color: white; padding: 10px 20px; margin-top: 10px; }
+        .btn-cancel { background: #555; color: white; padding: 10px 20px; margin-right: 10px; }
+
+        .search-bar { position: sticky; top: 0; z-index: 10; background: var(--bg-dark); padding: 10px 0; }
+        
+        .user-item { background: #252525; padding: 15px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .user-item:hover { background: #333; transform: scale(1.02); }
+        
+        .edit-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); z-index: 100; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        .delete-section { margin-top: 40px; border-top: 1px solid #444; padding-top: 20px; }
+        .btn-delete { background: #b33939; color: white; padding: 10px; width: 100%; }
     </style>
 </head>
 <body>
 
-    <h2 style="color: var(--main-color);">لوحة تحكم VENOM GYM 👑</h2>
+<div class="container">
+    <div class="logo">VENOM GYM ADMIN 👑</div>
 
-    <div class="admin-box">
-        <h3>إضافة أو تحديث وحش</h3>
-        <input type="text" id="userName" placeholder="اسم المتدرب">
-        <textarea id="foodPlan" placeholder="النظام الغذائي" rows="3"></textarea>
-        <textarea id="gymPlan" placeholder="برنامج التمرين" rows="3"></textarea>
-        <button onclick="saveUser()">حفظ البيانات 💾</button>
+    <div class="card">
+        <h3>إضافة وحش جديد 🔥</h3>
+        <input type="text" id="newName" placeholder="اسم المتدرب بالكامل">
+        <textarea id="newFood" placeholder="نظام التغذية..." rows="3"></textarea>
+        <textarea id="newGym" placeholder="برنامج التمرين..." rows="3"></textarea>
+        <button class="btn-add" onclick="addUser()">إضافة للعضويات 💾</button>
     </div>
 
-    <div class="user-list">
-        <h3>المشتركين الحاليين:</h3>
-        <div id="usersContainer">جاري التحميل...</div>
+    <div class="search-bar">
+        <input type="text" id="searchInp" placeholder="🔍 ابحث بالاسم عن أي بطل..." oninput="filterUsers()">
     </div>
 
-    <script>
-        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
+    <div id="usersList">
+        <p style="text-align:center; color:#666;">جاري تحميل الأبطال...</p>
+    </div>
+</div>
 
-        // جلب المشتركين وعرضهم
-        async function fetchUsers() {
-            try {
-                const res = await fetch(`${dbURL}.json`);
-                const data = await res.json();
-                const container = document.getElementById('usersContainer');
-                container.innerHTML = '';
+<div id="editScreen" class="edit-screen">
+    <div class="container">
+        <button class="btn-cancel" onclick="closeEdit()" style="margin-bottom: 20px;">⬅️ رجوع للقائمة</button>
+        <div class="card">
+            <h3>تعديل بيانات: <span id="editingTitle" style="color:var(--main-color)"></span></h3>
+            <label>نظام التغذية:</label>
+            <textarea id="editFood" rows="6"></textarea>
+            <label>برنامج التمرين:</label>
+            <textarea id="editGym" rows="6"></textarea>
+            <button class="btn-save" onclick="updateUser()">حفظ التعديلات ✅</button>
+        </div>
 
-                if (data) {
-                    Object.keys(data).forEach(name => {
-                        const div = document.createElement('div');
-                        div.className = 'user-item';
-                        div.innerHTML = `
-                            <div class="user-info">
-                                <strong>${name}</strong>
-                            </div>
-                            <button class="delete-btn" onclick="deleteUser('${name}')">حذف 🗑️</button>
-                        `;
-                        container.appendChild(div);
-                    });
-                } else {
-                    container.innerHTML = 'لا يوجد مشتركين حالياً.';
-                }
-            } catch (e) { console.error(e); }
+        <div class="delete-section">
+            <button class="btn-delete" onclick="deleteUser()">حذف العضو نهائياً 🗑️</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
+    let allUsers = {};
+    let currentEditingName = "";
+
+    // 1. جلب البيانات
+    async function loadUsers() {
+        try {
+            const res = await fetch(`${dbURL}.json`);
+            allUsers = await res.json() || {};
+            renderList(allUsers);
+        } catch (e) { console.error(e); }
+    }
+
+    // 2. عرض القائمة
+    function renderList(users) {
+        const list = document.getElementById('usersList');
+        list.innerHTML = '';
+        Object.keys(users).forEach(name => {
+            const div = document.createElement('div');
+            div.className = 'user-item';
+            div.onclick = () => openEdit(name);
+            div.innerHTML = `<span>👤 ${name}</span> <span>⚙️</span>`;
+            list.appendChild(div);
+        });
+    }
+
+    // 3. البحث
+    function filterUsers() {
+        const term = document.getElementById('searchInp').value.toLowerCase();
+        const filtered = {};
+        Object.keys(allUsers).forEach(name => {
+            if(name.toLowerCase().includes(term)) filtered[name] = allUsers[name];
+        });
+        renderList(filtered);
+    }
+
+    // 4. إضافة بطل جديد
+    async function addUser() {
+        const name = document.getElementById('newName').value.trim();
+        const food = document.getElementById('newFood').value.trim();
+        const gym = document.getElementById('newGym').value.trim();
+        if(!name) return alert("دخل الاسم الأول!");
+        
+        await fetch(`${dbURL}/${name}.json`, {
+            method: 'PUT',
+            body: JSON.stringify({ foodPlan: food, gymPlan: gym })
+        });
+        alert("تمت الإضافة بنجاح!");
+        location.reload();
+    }
+
+    // 5. فتح شاشة التعديل
+    function openEdit(name) {
+        currentEditingName = name;
+        document.getElementById('editingTitle').innerText = name;
+        document.getElementById('editFood').value = allUsers[name].foodPlan || "";
+        document.getElementById('editGym').value = allUsers[name].gymPlan || "";
+        document.getElementById('editScreen').style.display = 'block';
+    }
+
+    function closeEdit() { document.getElementById('editScreen').style.display = 'none'; }
+
+    // 6. تحديث البيانات
+    async function updateUser() {
+        const food = document.getElementById('editFood').value;
+        const gym = document.getElementById('editGym').value;
+        await fetch(`${dbURL}/${currentEditingName}.json`, {
+            method: 'PATCH',
+            body: JSON.stringify({ foodPlan: food, gymPlan: gym })
+        });
+        alert("تم التحديث!");
+        loadUsers();
+        closeEdit();
+    }
+
+    // 7. حذف عضو
+    async function deleteUser() {
+        if(confirm(`هل تريد حذف ${currentEditingName} نهائياً؟`)) {
+            await fetch(`${dbURL}/${currentEditingName}.json`, { method: 'DELETE' });
+            alert("تم الحذف!");
+            location.reload();
         }
+    }
 
-        // حفظ أو تحديث
-        async function saveUser() {
-            const name = document.getElementById('userName').value.trim();
-            const food = document.getElementById('foodPlan').value.trim();
-            const gym = document.getElementById('gymPlan').value.trim();
-
-            if (!name) return alert("اكتب الاسم!");
-
-            await fetch(`${dbURL}/${name}.json`, {
-                method: 'PUT',
-                body: JSON.stringify({ foodPlan: food, gymPlan: gym })
-            });
-            alert("تم الحفظ بنجاح!");
-            fetchUsers();
-        }
-
-        // حذف عضو
-        async function deleteUser(name) {
-            if (confirm(`هل أنت متأكد من حذف البطل (${name})؟`)) {
-                try {
-                    await fetch(`${dbURL}/${name}.json`, { method: 'DELETE' });
-                    alert("تم الحذف!");
-                    fetchUsers();
-                } catch (e) { alert("حدث خطأ في الحذف"); }
-            }
-        }
-
-        // تحميل القائمة عند فتح الصفحة
-        fetchUsers();
-    </script>
+    loadUsers();
+</script>
 </body>
 </html>

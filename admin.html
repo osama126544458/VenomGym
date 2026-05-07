@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>لوحة إدارة فينوم جيم - PRO 👑</title>
     <style>
-        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; }
+        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; }
         .navbar { background: var(--card); display: flex; justify-content: space-around; padding: 15px; border-bottom: 2px solid var(--main); position: sticky; top: 0; z-index: 100; }
         .nav-btn { color: #888; cursor: pointer; font-weight: bold; font-size: 14px; }
@@ -21,6 +21,7 @@
         .paid { background: var(--green); color: black; }
         .unpaid { background: var(--main); color: white; }
         .edit-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 200; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        #adminChatBox { max-height: 150px; overflow-y: auto; margin-top: 10px; font-size: 13px; text-align: right; background: #111; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; }
     </style>
 </head>
 <body>
@@ -61,6 +62,7 @@
 
     <div id="editOverlay" class="edit-overlay">
         <button onclick="closeEdit()" style="background:#333; color:white; border:none; padding:10px; border-radius:8px; margin-bottom:20px;">⬅️ رجوع</button>
+        
         <div class="card">
             <h3>تعديل بطل: <span id="editNameHeader" style="color:var(--main)"></span></h3>
             <label>حالة الدفع:</label>
@@ -70,15 +72,22 @@
             </select>
             <label>تاريخ الاشتراك:</label>
             <input type="date" id="editDate">
-            <textarea id="editFood" rows="4"></textarea>
-            <textarea id="editGym" rows="4"></textarea>
-            <button class="btn-save" onclick="updateUser()" style="background:var(--green)">تحديث ✅</button>
-            <button class="btn-save" onclick="deleteUser()" style="background:#444; margin-top:10px;">حذف 🗑️</button>
+            <textarea id="editFood" rows="4" placeholder="التغذية"></textarea>
+            <textarea id="editGym" rows="4" placeholder="التمرين"></textarea>
+            <button class="btn-save" onclick="updateUser()" style="background:var(--green)">تحديث البيانات ✅</button>
+            <button class="btn-save" onclick="deleteUser()" style="background:#444; margin-top:10px;">حذف الحساب 🗑️</button>
+        </div>
+
+        <div class="card" style="border-color: var(--purple);">
+            <h4>💬 إرسال رسالة للبطل</h4>
+            <textarea id="adminMsgText" placeholder="اكتب ملاحظاتك للبطل هنا..." rows="2"></textarea>
+            <button class="btn-save" onclick="sendMsg()" style="background:var(--purple); padding:10px;">إرسال الآن ✈️</button>
+            <div id="adminChatBox"></div>
         </div>
     </div>
 
     <script>
-        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
+        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
         let allUsers = {};
         let currentEdit = "";
 
@@ -102,13 +111,13 @@
                 foodPlan: document.getElementById('newFood').value,
                 gymPlan: document.getElementById('newGym').value
             };
-            await fetch(`${dbURL}/${name}.json`, { method: 'PUT', body: JSON.stringify(data) });
+            await fetch(`${dbURL}/users/${encodeURIComponent(name)}.json`, { method: 'PUT', body: JSON.stringify(data) });
             alert("تم الحفظ!");
             location.reload();
         }
 
         async function loadUsers() {
-            const res = await fetch(`${dbURL}.json`);
+            const res = await fetch(`${dbURL}/users.json`);
             allUsers = await res.json() || {};
             render(allUsers);
         }
@@ -119,9 +128,10 @@
             Object.keys(data).forEach(name => {
                 const user = data[name];
                 const end = new Date(user.startDate);
-                end.setDate(end.getDate() + parseInt(user.duration));
+                end.setDate(end.getDate() + parseInt(user.duration || 30));
                 const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
                 const statusClass = user.payment === 'paid' ? 'paid' : 'unpaid';
+                
                 const div = document.createElement('div');
                 div.className = 'user-card';
                 div.onclick = () => openEdit(name);
@@ -147,6 +157,7 @@
             document.getElementById('editFood').value = u.foodPlan;
             document.getElementById('editGym').value = u.gymPlan;
             document.getElementById('editOverlay').style.display = 'block';
+            loadAdminMessages(name);
         }
 
         function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; }
@@ -157,15 +168,51 @@
                 startDate: document.getElementById('editDate').value,
                 foodPlan: document.getElementById('editFood').value,
                 gymPlan: document.getElementById('editGym').value,
-                duration: allUsers[currentEdit].duration
+                duration: allUsers[currentEdit].duration || "30"
             };
-            await fetch(`${dbURL}/${currentEdit}.json`, { method: 'PATCH', body: JSON.stringify(data) });
+            await fetch(`${dbURL}/users/${encodeURIComponent(currentEdit)}.json`, { method: 'PATCH', body: JSON.stringify(data) });
             alert("تم التحديث!");
             closeEdit(); loadUsers();
         }
 
         async function deleteUser() {
-            if(confirm("حذف؟")) { await fetch(`${dbURL}/${currentEdit}.json`, { method: 'DELETE' }); closeEdit(); loadUsers(); }
+            if(confirm("هل أنت متأكد من حذف هذا البطل نهائياً؟")) {
+                await fetch(`${dbURL}/users/${encodeURIComponent(currentEdit)}.json`, { method: 'DELETE' });
+                await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'DELETE' }); // حذف الرسايل كمان
+                closeEdit(); loadUsers();
+            }
+        }
+
+        // --- نظام المراسلة ---
+        async function sendMsg() {
+            const text = document.getElementById('adminMsgText').value.trim();
+            if(!text) return;
+            const msgData = {
+                sender: "admin",
+                text: text,
+                time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})
+            };
+            await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'POST', body: JSON.stringify(msgData) });
+            document.getElementById('adminMsgText').value = '';
+            loadAdminMessages(currentEdit);
+        }
+
+        async function loadAdminMessages(name) {
+            const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
+            const data = await res.json();
+            const box = document.getElementById('adminChatBox');
+            box.innerHTML = '';
+            if(data) {
+                Object.keys(data).forEach(id => {
+                    const m = data[id];
+                    box.innerHTML += `<div style="color: ${m.sender === 'admin' ? '#ff4757' : '#2ed573'}">
+                                        <strong>${m.sender === 'admin' ? 'أنا' : 'البطل'}:</strong> ${m.text}
+                                      </div>`;
+                });
+                box.scrollTop = box.scrollHeight;
+            } else {
+                box.innerHTML = '<p style="color:#666">لا توجد رسائل سابقة</p>';
+            }
         }
     </script>
 </body>

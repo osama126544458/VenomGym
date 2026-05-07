@@ -6,39 +6,38 @@
     <title>👑 VENOM GYM</title>
     <style>
         :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; --blue: #3498db; --user-msg: #202c33; --admin-msg: #005c4b; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 15px; text-align: center; }
-        .logo { font-size: 24px; font-weight: bold; color: var(--main); border-bottom: 2px solid var(--main); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
-        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #333; position: relative; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #444; background: #222; color: white; outline: none; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 10px; overflow-x: hidden; }
+        .logo { font-size: 24px; font-weight: bold; color: var(--main); border-bottom: 2px solid var(--main); display: inline-block; margin: 20px auto; width: fit-content; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #333; position: relative; max-width: 500px; margin: auto; }
+        input, textarea, select { width: 100%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #444; background: #222; color: white; outline: none; box-sizing: border-box; }
         button { background: var(--main); color: white; border: none; padding: 12px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .info-box { display: none; margin-top: 20px; text-align: right; }
-        .stat-card { background: #222; padding: 12px; border-radius: 12px; margin-bottom: 12px; border-right: 5px solid var(--main); }
+        .stat-card { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 5px solid var(--main); position: relative; }
         
-        /* أيقونة الرسائل مع العداد */
-        .msg-icon-container { position: absolute; top: 20px; left: 20px; cursor: pointer; }
-        .msg-badge { position: absolute; top: -8px; right: -8px; background: var(--main); color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; }
+        /* أيقونة الرسائل */
+        .msg-icon-container { position: absolute; top: 15px; left: 15px; cursor: pointer; z-index: 5; }
+        .msg-badge { position: absolute; top: -5px; right: -5px; background: var(--main); color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; }
 
-        /* الشات الاحترافي */
-        #chatPage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 1000; padding: 15px; box-sizing: border-box; }
-        #chatBox { height: calc(100% - 150px); overflow-y: auto; background: #0d1418; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .msg { max-width: 80%; padding: 10px; border-radius: 12px; font-size: 14px; position: relative; }
+        /* برواز المطور اللي رجعناه */
+        .dev-box { margin-top: 20px; border: 1px dashed var(--main); padding: 10px; border-radius: 10px; font-size: 12px; color: #888; text-align: center; }
+        .whatsapp-btn { background: #25d366; color: white; padding: 8px 15px; border-radius: 20px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; font-size: 13px; }
+
+        /* الشات */
+        #chatPage { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 2000; padding: 10px; box-sizing: border-box; }
+        #chatBox { height: calc(100% - 130px); overflow-y: auto; background: #0d1418; border-radius: 15px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid #333; }
+        .msg { max-width: 80%; padding: 10px; border-radius: 12px; font-size: 14px; position: relative; word-wrap: break-word; }
         .admin-msg { background: var(--admin-msg); align-self: flex-start; border-top-right-radius: 2px; }
         .user-msg { background: var(--user-msg); align-self: flex-end; border-top-left-radius: 2px; }
-        .status { font-size: 12px; margin-right: 5px; vertical-align: bottom; }
-        .seen { color: var(--blue); }
-        .delivered { color: #888; }
-        .chat-footer { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
-        .chat-img { max-width: 100%; border-radius: 8px; margin-top: 5px; }
-        .audio-player { width: 100%; margin-top: 5px; height: 30px; }
+        .chat-footer { display: flex; align-items: center; gap: 5px; padding: 10px 0; }
     </style>
 </head>
 <body>
 
-    <div class="logo">👑 VENOM GYM</div>
+    <center><div class="logo">👑 VENOM GYM</div></center>
 
     <div class="card" id="loginBox">
-        <h3 style="margin:0">أهلاً بك يا بطل 🔥</h3>
-        <input type="text" id="userName" placeholder="اكتب اسمك الثلاثي...">
+        <h3 style="margin-top:0">دخول الأبطال 🔥</h3>
+        <input type="text" id="userName" placeholder="الاسم الثلاثي...">
         <button onclick="fetchData()">دخول 🚀</button>
     </div>
 
@@ -46,38 +45,45 @@
         <div class="card">
             <div class="msg-icon-container" onclick="openChat()">
                 <span style="font-size: 24px;">💬</span>
-                <span id="globalBadge" class="msg-badge">0</span>
+                <span id="globalBadge" class="msg-badge" style="display:none">0</span>
             </div>
 
             <h2 id="displayName" style="margin:0; color:var(--main); text-align: center;"></h2>
             <p id="daysLeft" style="text-align:center; font-weight:bold; color:#ffa502;"></p>
             
-            <div class="stat-card"><strong>🥗 التغذية:</strong><p id="foodResult"></p></div>
-            <div class="stat-card" style="border-right-color:var(--blue)"><strong>💪 التمرين:</strong><p id="gymResult"></p></div>
+            <div class="stat-card"><strong>🥗 التغذية:</strong><p id="foodResult" style="margin:5px 0"></p></div>
+            <div class="stat-card" style="border-right-color:var(--blue)"><strong>💪 التمرين:</strong><p id="gymResult" style="margin:5px 0"></p></div>
             
             <button onclick="location.reload()" style="background:#444; margin-top:10px;">تسجيل خروج ⬅️</button>
+
+            <div class="dev-box">
+                برمجة وتطوير: <b>أسامة قنديل</b> 🛠️<br>
+                <a href="https://wa.me/201507667955" class="whatsapp-btn">
+                    <span>تواصل واتساب</span> ✅
+                </a>
+            </div>
         </div>
     </div>
 
     <div id="chatPage">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-            <button onclick="closeChat()" style="width:70px; padding:5px; background:#333;">رجوع</button>
+            <button onclick="closeChat()" style="width:70px; padding:8px; background:#333;">رجوع</button>
             <h3 style="margin:0">الكابتن أسامة 👑</h3>
         </div>
         <div id="chatBox"></div>
         <div class="chat-footer">
-            <input type="text" id="msgInput" placeholder="اكتب رسالتك..." style="margin:0; flex:1;">
-            <label style="cursor:pointer; font-size:20px;">🖼️<input type="file" id="imgInput" hidden accept="image/*" onchange="sendMedia('img')"></label>
-            <button id="micBtn" style="width:40px; padding:8px; background:var(--purple);">🎤</button>
-            <button onclick="sendText()" style="width:60px; padding:8px;">إرسال</button>
+            <input type="text" id="msgInput" placeholder="اكتب..." style="margin:0; flex:1;">
+            <label style="cursor:pointer; font-size:22px;">🖼️<input type="file" id="imgInput" hidden onchange="sendMedia('img')"></label>
+            <button id="micBtn" style="width:45px; background:var(--purple);">🎤</button>
+            <button onclick="sendText()" style="width:60px;">إرسال</button>
         </div>
     </div>
 
     <script>
+        // الكود البرمجي (نفس الكود السابق مع تظبيط الاستدعاءات)
         const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
         const noteSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
         let currentU = "", lastC = 0, isChatOpen = false;
-        let mediaRecorder, audioChunks = [];
 
         async function fetchData() {
             const name = document.getElementById('userName').value.trim();
@@ -91,54 +97,26 @@
             document.getElementById('displayName').innerText = name;
             document.getElementById('foodResult').innerText = data.foodPlan || "قريباً";
             document.getElementById('gymResult').innerText = data.gymPlan || "قريباً";
-            
-            // تحديث حالة الأونلاين
-            updateOnlineStatus(true);
             listenToMessages();
         }
 
-        function openChat() { 
-            isChatOpen = true; 
-            document.getElementById('chatPage').style.display='block'; 
-            markAsSeen();
-        }
+        function openChat() { isChatOpen = true; document.getElementById('chatPage').style.display='block'; markAsSeen(); }
         function closeChat() { isChatOpen = false; document.getElementById('chatPage').style.display='none'; }
-
-        async function updateOnlineStatus(status) {
-            await fetch(`${dbURL}/users/${encodeURIComponent(currentU)}/isOnline.json`, { method:'PUT', body: status });
-        }
-
+        
         async function sendText() {
-            const txt = document.getElementById('msgInput').value.trim();
-            if(!txt) return;
-            await pushMsg({ type:'text', content: txt });
+            const val = document.getElementById('msgInput').value.trim();
+            if(!val) return;
+            const data = { type:'text', content:val, sender:'user', time: new Date().toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'}), status:'sent' };
+            await fetch(`${dbURL}/messages/${encodeURIComponent(currentU)}.json`, { method:'POST', body:JSON.stringify(data)});
             document.getElementById('msgInput').value = '';
-        }
-
-        async function pushMsg(msgObj) {
-            const data = { ...msgObj, sender:'user', time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}), status:'sent' };
-            await fetch(`${dbURL}/messages/${encodeURIComponent(currentU)}.json`, { method:'POST', body: JSON.stringify(data) });
-        }
-
-        async function sendMedia(type) {
-            const file = document.getElementById('imgInput').files[0];
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                await pushMsg({ type:'img', content: e.target.result });
-            };
-            reader.readAsDataURL(file);
         }
 
         async function markAsSeen() {
             const res = await fetch(`${dbURL}/messages/${encodeURIComponent(currentU)}.json`);
             const msgs = await res.json();
-            if(msgs) {
-                Object.keys(msgs).forEach(id => {
-                    if(msgs[id].sender === 'admin') {
-                        fetch(`${dbURL}/messages/${encodeURIComponent(currentU)}/${id}/status.json`, { method:'PUT', body: '"seen"' });
-                    }
-                });
-            }
+            if(msgs) Object.keys(msgs).forEach(id => {
+                if(msgs[id].sender === 'admin') fetch(`${dbURL}/messages/${encodeURIComponent(currentU)}/${id}/status.json`, { method:'PUT', body: '"seen"' });
+            });
         }
 
         function listenToMessages() {
@@ -153,38 +131,18 @@
                     box.innerHTML = '';
                     keys.forEach(k => {
                         const m = msgs[k];
-                        if(m.sender === 'admin' && m.status !== 'seen') unread++;
-                        
-                        let content = m.type === 'img' ? `<img src="${m.content}" class="chat-img">` : m.type === 'audio' ? `<audio controls src="${m.content}" class="audio-player"></audio>` : m.content;
-                        
-                        // أيقونات الصح
-                        let ticks = m.sender === 'user' ? `<span class="status ${m.status === 'seen' ? 'seen' : m.status === 'delivered' ? 'delivered' : ''}">${m.status === 'seen' ? '✓✓' : m.status === 'delivered' ? '✓✓' : '✓'}</span>` : '';
-                        
-                        box.innerHTML += `<div class="msg ${m.sender==='admin'?'admin-msg':'user-msg'}">${content}<br><small style="font-size:9px; opacity:0.7;">${m.time} ${ticks}</small></div>`;
+                        if(m.sender==='admin' && m.status!=='seen') unread++;
+                        let ticks = m.sender==='user' ? `<span style="font-size:10px; margin-right:4px; color:${m.status==='seen'?'#3498db':'#888'}">${m.status==='seen'?'✓✓':'✓'}</span>` : '';
+                        let content = m.type === 'img' ? `<img src="${m.content}" style="max-width:100%; border-radius:8px">` : m.content;
+                        box.innerHTML += `<div class="msg ${m.sender==='admin'?'admin-msg':'user-msg'}">${content}<br><small style="font-size:9px; opacity:0.6">${m.time} ${ticks}</small></div>`;
                     });
                     if(unread > 0) { badge.innerText = unread; badge.style.display='block'; if(keys.length > lastC) noteSound.play(); }
-                    else { badge.style.display='none'; }
+                    else badge.style.display='none';
                     lastC = keys.length;
                     if(isChatOpen) { box.scrollTop = box.scrollHeight; markAsSeen(); }
                 }
             }, 3000);
         }
-
-        // تسجيل الڤويس
-        navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-            mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
-                const reader = new FileReader();
-                reader.onload = async e => await pushMsg({ type:'audio', content: e.target.result });
-                reader.readAsDataURL(audioBlob);
-                audioChunks = [];
-            };
-        });
-
-        document.getElementById('micBtn').onmousedown = () => { mediaRecorder.start(); document.getElementById('micBtn').style.background='red'; };
-        document.getElementById('micBtn').onmouseup = () => { mediaRecorder.stop(); document.getElementById('micBtn').style.background='var(--purple)'; };
     </script>
 </body>
 </html>

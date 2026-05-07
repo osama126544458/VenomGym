@@ -3,144 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة تحكم فينوم PRO 👑</title>
+    <title>لوحة تحكم فينوم 👑</title>
     <style>
-        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; }
+        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; --blue: #3498db; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; }
         .navbar { background: var(--card); display: flex; justify-content: space-around; padding: 15px; border-bottom: 2px solid var(--main); position: sticky; top: 0; z-index: 100; }
-        .nav-btn { color: #888; cursor: pointer; font-weight: bold; }
-        .nav-btn.active { color: var(--main); border-bottom: 2px solid var(--main); }
+        .nav-btn { color: #888; cursor: pointer; position: relative; font-weight: bold; }
+        .nav-btn.active { color: var(--main); }
+        .nav-badge { position: absolute; top: -10px; right: -15px; background: red; border-radius: 50%; padding: 2px 6px; font-size: 10px; display: none; }
         .container { padding: 20px; max-width: 600px; margin: auto; }
-        .page { display: none; }
-        .page.active { display: block; }
-        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
-        input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; }
-        .btn-save { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .user-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid #444; cursor: pointer; }
-        .edit-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 200; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        
-        /* صندوق الشات للأدمن */
-        #adminChatBox { height: 200px; overflow-y: auto; background: #111; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
-        .a-msg { padding: 6px 12px; border-radius: 8px; font-size: 13px; width: fit-content; max-width: 85%; }
-        .from-admin { background: var(--main); align-self: flex-end; }
-        .from-user { background: #333; align-self: flex-start; }
+        .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 15px; position: relative; }
+        .user-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid #444; position: relative; cursor: pointer; }
+        .online-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; display: inline-block; margin-left: 5px; }
+        .unread-dot { width: 12px; height: 12px; background: var(--main); border-radius: 50%; position: absolute; left: 15px; top: 40%; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 200; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+        #adminChatBox { height: 250px; overflow-y: auto; background: #0d1418; padding: 15px; border-radius: 12px; display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+        .a-msg { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 13px; }
+        .from-admin { background: #005c4b; align-self: flex-end; }
+        .from-user { background: #202c33; align-self: flex-start; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <div class="nav-btn active" onclick="showPage('addPage')">➕ إضافة بطل</div>
-        <div class="nav-btn" onclick="showPage('listPage')">👥 المشتركين</div>
+        <div class="nav-btn active" onclick="showP('add')">➕ إضافة بطل</div>
+        <div class="nav-btn" onclick="showP('list')">
+            👥 إدارة المشتركين
+            <span id="navBadge" class="nav-badge">0</span>
+        </div>
     </div>
 
     <div class="container">
-        <div id="addPage" class="page active">
-            <h2>بطل جديد 🔥</h2>
+        <div id="add" class="page active">
             <div class="card">
-                <input type="text" id="newName" placeholder="الاسم">
-                <input type="date" id="startDate">
-                <select id="duration"><option value="30">شهر</option><option value="90">3 شهور</option></select>
-                <select id="paymentStatus"><option value="paid">دفع ✅</option><option value="unpaid">لم يدفع ❌</option></select>
-                <textarea id="newFood" placeholder="التغذية" rows="2"></textarea>
-                <textarea id="newGym" placeholder="التمرين" rows="2"></textarea>
-                <button class="btn-save" onclick="saveUser()">حفظ 💾</button>
+                <h3>بطل جديد 🔥</h3>
+                <input type="text" id="nName" placeholder="اسم البطل">
+                <input type="date" id="nDate">
+                <textarea id="nFood" placeholder="نظام التغذية..."></textarea>
+                <textarea id="nGym" placeholder="برنامج التمرين..."></textarea>
+                <button onclick="saveU()" style="background:var(--main); color:white; border:none; padding:15px; width:100%; border-radius:10px;">حفظ البيانات 💾</button>
             </div>
         </div>
 
-        <div id="listPage" class="page">
-            <input type="text" id="searchBar" placeholder="بحث بالاسم..." oninput="search()">
-            <div id="usersList"></div>
+        <div id="list" class="page" style="display:none">
+            <input type="text" placeholder="بحث بالاسم..." oninput="search(this.value)">
+            <div id="uList"></div>
         </div>
     </div>
 
-    <div id="editOverlay" class="edit-overlay">
-        <button onclick="closeEdit()" style="background:#333; color:white; border:none; padding:10px; border-radius:8px; margin-bottom:15px;">⬅️ رجوع</button>
-        <div class="card">
-            <h3>تعديل: <span id="editNameHeader" style="color:var(--main)"></span></h3>
-            <select id="editPayment"><option value="paid">دفع ✅</option><option value="unpaid">لم يدفع ❌</option></select>
-            <input type="date" id="editDate">
-            <textarea id="editFood" rows="3"></textarea>
-            <textarea id="editGym" rows="3"></textarea>
-            <button class="btn-save" onclick="updateUser()" style="background:var(--green)">تحديث ✅</button>
+    <div id="editOverlay" class="overlay">
+        <button onclick="closeEdit()" style="background:#333; color:white; border:none; padding:10px; border-radius:8px;">⬅️ رجوع</button>
+        <div class="card" style="margin-top:15px;">
+            <h3>تعديل: <span id="hName" style="color:var(--main)"></span> <span id="onlineStatus"></span></h3>
+            <textarea id="eFood" rows="3"></textarea>
+            <textarea id="eGym" rows="3"></textarea>
+            <button onclick="updateU()" style="background:var(--green); border:none; padding:10px; width:100%; border-radius:8px; color:black; font-weight:bold;">تحديث البيانات ✅</button>
         </div>
 
-        <div class="card" style="border-color: var(--purple);">
-            <h4>💬 دردشة مع البطل</h4>
+        <div class="card" style="border-color:var(--purple)">
+            <h4>💬 دردشة واتساب</h4>
             <div id="adminChatBox"></div>
             <div style="display:flex; gap:5px;">
-                <input type="text" id="adminMsgText" placeholder="اكتب رسالة..." style="margin:0;">
-                <button onclick="sendAdminMsg()" style="background:var(--purple); width:80px; border-radius:8px; border:none; color:white;">إرسال</button>
+                <input type="text" id="aInput" placeholder="اكتب ردك..." style="margin:0; flex:1;">
+                <button onclick="sendMedia()" style="background:none; border:none; font-size:20px; cursor:pointer;">🖼️</button>
+                <button onclick="sendA()" style="background:var(--purple); border:none; color:white; width:70px; border-radius:8px;">إرسال</button>
+                <input type="file" id="aFile" hidden accept="image/*" onchange="uploadImg()">
             </div>
         </div>
     </div>
 
     <script>
         const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
-        let allUsers = {}, currentEdit = "", chatInt;
+        const aSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+        let allU = {}, currE = "", cInt;
 
-        function showPage(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            if(id === 'listPage') loadUsers();
+        function showP(p) { 
+            document.querySelectorAll('.page').forEach(x => x.style.display='none');
+            document.getElementById(p).style.display='block';
+            if(p==='list') loadU();
         }
 
-        async function saveUser() {
-            const name = document.getElementById('newName').value.trim();
-            const data = { startDate: document.getElementById('startDate').value, duration: document.getElementById('duration').value, payment: document.getElementById('paymentStatus').value, foodPlan: document.getElementById('newFood').value, gymPlan: document.getElementById('newGym').value };
-            await fetch(`${dbURL}/users/${encodeURIComponent(name)}.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert("تم!"); location.reload();
-        }
-
-        async function loadUsers() {
+        async function loadU() {
             const res = await fetch(`${dbURL}/users.json`);
-            allUsers = await res.json() || {};
-            render(allUsers);
+            allU = await res.json() || {};
+            render(allU);
+            checkGlobalUnread();
+        }
+
+        async function checkGlobalUnread() {
+            const res = await fetch(`${dbURL}/messages.json`);
+            const allMsgs = await res.json() || {};
+            let total = 0;
+            Object.keys(allMsgs).forEach(u => {
+                Object.keys(allMsgs[u]).forEach(mId => {
+                    if(allMsgs[u][mId].sender === 'user' && allMsgs[u][mId].status !== 'seen') total++;
+                });
+            });
+            const b = document.getElementById('navBadge');
+            if(total > 0) { b.innerText = total; b.style.display='block'; }
+            else b.style.display='none';
         }
 
         function render(data) {
-            const list = document.getElementById('usersList'); list.innerHTML = '';
-            Object.keys(data).forEach(name => {
+            const list = document.getElementById('uList'); list.innerHTML = '';
+            Object.keys(data).forEach(async name => {
+                const u = data[name];
+                const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
+                const msgs = await res.json();
+                let hasUnread = false;
+                if(msgs) Object.values(msgs).forEach(m => { if(m.sender==='user' && m.status!=='seen') hasUnread=true; });
+
                 const div = document.createElement('div'); div.className = 'user-card';
-                div.innerHTML = `<strong>👤 ${name}</strong>`;
-                div.onclick = () => openEdit(name);
+                div.onclick = () => openE(name);
+                div.innerHTML = `${u.isOnline ? '<span class="online-dot"></span>' : ''} <strong>${name}</strong>
+                                 ${hasUnread ? '<span class="unread-dot"></span>' : ''}`;
                 list.appendChild(div);
             });
         }
 
-        function openEdit(name) {
-            currentEdit = name; const u = allUsers[name];
-            document.getElementById('editNameHeader').innerText = name;
-            document.getElementById('editPayment').value = u.payment;
-            document.getElementById('editDate').value = u.startDate;
-            document.getElementById('editFood').value = u.foodPlan;
-            document.getElementById('editGym').value = u.gymPlan;
-            document.getElementById('editOverlay').style.display = 'block';
-            loadMsgs(name);
-            chatInt = setInterval(() => loadMsgs(name), 3000);
+        function openE(name) {
+            currE = name; const u = allU[name];
+            document.getElementById('hName').innerText = name;
+            document.getElementById('eFood').value = u.foodPlan;
+            document.getElementById('eGym').value = u.gymPlan;
+            document.getElementById('onlineStatus').innerHTML = u.isOnline ? '<small style="color:var(--green)">متصل الآن</small>' : '<small style="color:#666">أوفلاين</small>';
+            document.getElementById('editOverlay').style.display='block';
+            loadAMsgs();
+            cInt = setInterval(loadAMsgs, 3000);
         }
 
-        function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; clearInterval(chatInt); }
+        function closeEdit() { document.getElementById('editOverlay').style.display='none'; clearInterval(cInt); loadU(); }
 
-        async function sendAdminMsg() {
-            const text = document.getElementById('adminMsgText').value.trim();
-            if(!text) return;
-            const msg = { sender: "admin", text: text, time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) };
-            await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'POST', body: JSON.stringify(msg) });
-            document.getElementById('adminMsgText').value = '';
-        }
-
-        async function loadMsgs(name) {
-            const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
+        async function loadAMsgs() {
+            const res = await fetch(`${dbURL}/messages/${encodeURIComponent(currE)}.json`);
             const msgs = await res.json();
             const box = document.getElementById('adminChatBox');
             if(msgs) {
                 box.innerHTML = '';
                 Object.keys(msgs).forEach(id => {
                     const m = msgs[id];
-                    box.innerHTML += `<div class="a-msg ${m.sender === 'admin' ? 'from-admin' : 'from-user'}">${m.text}</div>`;
+                    if(m.sender==='user' && m.status !== 'seen') {
+                        fetch(`${dbURL}/messages/${encodeURIComponent(currE)}/${id}/status.json`, { method:'PUT', body: '"seen"' });
+                    }
+                    let content = m.type === 'img' ? `<img src="${m.content}" style="max-width:100%; border-radius:5px;">` : m.type === 'audio' ? `<audio controls src="${m.content}" style="width:100%; height:30px;"></audio>` : m.content;
+                    box.innerHTML += `<div class="a-msg ${m.sender==='admin'?'from-admin':'from-user'}">${content}</div>`;
                 });
                 box.scrollTop = box.scrollHeight;
             }
+        }
+
+        async function sendA() {
+            const txt = document.getElementById('aInput').value.trim();
+            if(!txt) return;
+            const data = { type:'text', content: txt, sender:'admin', time: new Date().toLocaleTimeString('ar-EG'), status:'sent' };
+            await fetch(`${dbURL}/messages/${encodeURIComponent(currE)}.json`, { method:'POST', body: JSON.stringify(data) });
+            document.getElementById('aInput').value = '';
+        }
+
+        function sendMedia() { document.getElementById('aFile').click(); }
+        async function uploadImg() {
+            const file = document.getElementById('aFile').files[0];
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const data = { type:'img', content: e.target.result, sender:'admin', time: new Date().toLocaleTimeString('ar-EG'), status:'sent' };
+                await fetch(`${dbURL}/messages/${encodeURIComponent(currE)}.json`, { method:'POST', body: JSON.stringify(data) });
+            };
+            reader.readAsDataURL(file);
         }
     </script>
 </body>

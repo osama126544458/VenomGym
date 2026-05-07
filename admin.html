@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة إدارة فينوم جيم - PRO 👑</title>
+    <title>لوحة تحكم فينوم PRO 👑</title>
     <style>
         :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; }
         .navbar { background: var(--card); display: flex; justify-content: space-around; padding: 15px; border-bottom: 2px solid var(--main); position: sticky; top: 0; z-index: 100; }
-        .nav-btn { color: #888; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .nav-btn { color: #888; cursor: pointer; font-weight: bold; }
         .nav-btn.active { color: var(--main); border-bottom: 2px solid var(--main); }
         .container { padding: 20px; max-width: 600px; margin: auto; }
         .page { display: none; }
@@ -16,104 +16,79 @@
         .card { background: var(--card); padding: 20px; border-radius: 15px; border: 1px solid #333; margin-bottom: 20px; }
         input, textarea, select { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #222; color: white; box-sizing: border-box; }
         .btn-save { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        .user-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 12px; border-right: 5px solid #444; position: relative; cursor: pointer; }
-        .status-tag { position: absolute; left: 15px; top: 15px; font-size: 11px; padding: 4px 8px; border-radius: 5px; }
-        .paid { background: var(--green); color: black; }
-        .unpaid { background: var(--main); color: white; }
+        .user-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-right: 5px solid #444; cursor: pointer; }
         .edit-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--dark); z-index: 200; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        #adminChatBox { max-height: 150px; overflow-y: auto; margin-top: 10px; font-size: 13px; text-align: right; background: #111; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 5px; }
+        
+        /* صندوق الشات للأدمن */
+        #adminChatBox { height: 200px; overflow-y: auto; background: #111; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 5px; }
+        .a-msg { padding: 6px 12px; border-radius: 8px; font-size: 13px; width: fit-content; max-width: 85%; }
+        .from-admin { background: var(--main); align-self: flex-end; }
+        .from-user { background: #333; align-self: flex-start; }
     </style>
 </head>
 <body>
 
     <div class="navbar">
-        <div class="nav-btn active" id="btnA" onclick="showPage('addPage')">➕ إضافة بطل</div>
-        <div class="nav-btn" id="btnL" onclick="showPage('listPage')">👥 إدارة المشتركين</div>
+        <div class="nav-btn active" onclick="showPage('addPage')">➕ إضافة بطل</div>
+        <div class="nav-btn" onclick="showPage('listPage')">👥 المشتركين</div>
     </div>
 
     <div class="container">
         <div id="addPage" class="page active">
-            <h2>تسجيل مشترك جديد 🔥</h2>
+            <h2>بطل جديد 🔥</h2>
             <div class="card">
-                <input type="text" id="newName" placeholder="اسم البطل">
-                <div style="display: flex; gap: 10px;">
-                    <input type="date" id="startDate">
-                    <select id="duration">
-                        <option value="30">شهر واحد</option>
-                        <option value="90">3 شهور</option>
-                    </select>
-                </div>
-                <select id="paymentStatus">
-                    <option value="paid">تم الدفع ✅</option>
-                    <option value="unpaid">لم يدفع بعد ❌</option>
-                </select>
-                <textarea id="newFood" placeholder="نظام التغذية..." rows="3"></textarea>
-                <textarea id="newGym" placeholder="برنامج التمرين..." rows="3"></textarea>
-                <button class="btn-save" onclick="saveUser()">حفظ البيانات 💾</button>
+                <input type="text" id="newName" placeholder="الاسم">
+                <input type="date" id="startDate">
+                <select id="duration"><option value="30">شهر</option><option value="90">3 شهور</option></select>
+                <select id="paymentStatus"><option value="paid">دفع ✅</option><option value="unpaid">لم يدفع ❌</option></select>
+                <textarea id="newFood" placeholder="التغذية" rows="2"></textarea>
+                <textarea id="newGym" placeholder="التمرين" rows="2"></textarea>
+                <button class="btn-save" onclick="saveUser()">حفظ 💾</button>
             </div>
         </div>
 
         <div id="listPage" class="page">
-            <h2>إدارة الأبطال 🔍</h2>
-            <input type="text" id="searchBar" placeholder="ابحث بالاسم..." oninput="search()">
-            <div id="usersList" style="margin-top: 20px;"></div>
+            <input type="text" id="searchBar" placeholder="بحث بالاسم..." oninput="search()">
+            <div id="usersList"></div>
         </div>
     </div>
 
     <div id="editOverlay" class="edit-overlay">
-        <button onclick="closeEdit()" style="background:#333; color:white; border:none; padding:10px; border-radius:8px; margin-bottom:20px;">⬅️ رجوع</button>
-        
+        <button onclick="closeEdit()" style="background:#333; color:white; border:none; padding:10px; border-radius:8px; margin-bottom:15px;">⬅️ رجوع</button>
         <div class="card">
-            <h3>تعديل بطل: <span id="editNameHeader" style="color:var(--main)"></span></h3>
-            <label>حالة الدفع:</label>
-            <select id="editPayment">
-                <option value="paid">تم الدفع ✅</option>
-                <option value="unpaid">لم يدفع ❌</option>
-            </select>
-            <label>تاريخ الاشتراك:</label>
+            <h3>تعديل: <span id="editNameHeader" style="color:var(--main)"></span></h3>
+            <select id="editPayment"><option value="paid">دفع ✅</option><option value="unpaid">لم يدفع ❌</option></select>
             <input type="date" id="editDate">
-            <textarea id="editFood" rows="4" placeholder="التغذية"></textarea>
-            <textarea id="editGym" rows="4" placeholder="التمرين"></textarea>
-            <button class="btn-save" onclick="updateUser()" style="background:var(--green)">تحديث البيانات ✅</button>
-            <button class="btn-save" onclick="deleteUser()" style="background:#444; margin-top:10px;">حذف الحساب 🗑️</button>
+            <textarea id="editFood" rows="3"></textarea>
+            <textarea id="editGym" rows="3"></textarea>
+            <button class="btn-save" onclick="updateUser()" style="background:var(--green)">تحديث ✅</button>
         </div>
 
         <div class="card" style="border-color: var(--purple);">
-            <h4>💬 إرسال رسالة للبطل</h4>
-            <textarea id="adminMsgText" placeholder="اكتب ملاحظاتك للبطل هنا..." rows="2"></textarea>
-            <button class="btn-save" onclick="sendMsg()" style="background:var(--purple); padding:10px;">إرسال الآن ✈️</button>
+            <h4>💬 دردشة مع البطل</h4>
             <div id="adminChatBox"></div>
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="adminMsgText" placeholder="اكتب رسالة..." style="margin:0;">
+                <button onclick="sendAdminMsg()" style="background:var(--purple); width:80px; border-radius:8px; border:none; color:white;">إرسال</button>
+            </div>
         </div>
     </div>
 
     <script>
         const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
-        let allUsers = {};
-        let currentEdit = "";
-
-        document.getElementById('startDate').valueAsDate = new Date();
+        let allUsers = {}, currentEdit = "", chatInt;
 
         function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            if(id === 'addPage') document.getElementById('btnA').classList.add('active');
-            else { document.getElementById('btnL').classList.add('active'); loadUsers(); }
+            if(id === 'listPage') loadUsers();
         }
 
         async function saveUser() {
             const name = document.getElementById('newName').value.trim();
-            if(!name) return alert("الاسم مطلوب!");
-            const data = {
-                startDate: document.getElementById('startDate').value,
-                duration: document.getElementById('duration').value,
-                payment: document.getElementById('paymentStatus').value,
-                foodPlan: document.getElementById('newFood').value,
-                gymPlan: document.getElementById('newGym').value
-            };
+            const data = { startDate: document.getElementById('startDate').value, duration: document.getElementById('duration').value, payment: document.getElementById('paymentStatus').value, foodPlan: document.getElementById('newFood').value, gymPlan: document.getElementById('newGym').value };
             await fetch(`${dbURL}/users/${encodeURIComponent(name)}.json`, { method: 'PUT', body: JSON.stringify(data) });
-            alert("تم الحفظ!");
-            location.reload();
+            alert("تم!"); location.reload();
         }
 
         async function loadUsers() {
@@ -123,95 +98,48 @@
         }
 
         function render(data) {
-            const list = document.getElementById('usersList');
-            list.innerHTML = '';
+            const list = document.getElementById('usersList'); list.innerHTML = '';
             Object.keys(data).forEach(name => {
-                const user = data[name];
-                const end = new Date(user.startDate);
-                end.setDate(end.getDate() + parseInt(user.duration || 30));
-                const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
-                const statusClass = user.payment === 'paid' ? 'paid' : 'unpaid';
-                
-                const div = document.createElement('div');
-                div.className = 'user-card';
+                const div = document.createElement('div'); div.className = 'user-card';
+                div.innerHTML = `<strong>👤 ${name}</strong>`;
                 div.onclick = () => openEdit(name);
-                div.innerHTML = `<span class="status-tag ${statusClass}">${user.payment === 'paid' ? 'مدفوع' : 'غير مدفوع'}</span>
-                                 <strong>👤 ${name}</strong><br><small>⏳ متبقي: ${diff} يوم</small>`;
                 list.appendChild(div);
             });
         }
 
-        function search() {
-            const term = document.getElementById('searchBar').value.toLowerCase();
-            const filtered = {};
-            Object.keys(allUsers).forEach(n => { if(n.toLowerCase().includes(term)) filtered[n] = allUsers[n]; });
-            render(filtered);
-        }
-
         function openEdit(name) {
-            currentEdit = name;
-            const u = allUsers[name];
+            currentEdit = name; const u = allUsers[name];
             document.getElementById('editNameHeader').innerText = name;
             document.getElementById('editPayment').value = u.payment;
             document.getElementById('editDate').value = u.startDate;
             document.getElementById('editFood').value = u.foodPlan;
             document.getElementById('editGym').value = u.gymPlan;
             document.getElementById('editOverlay').style.display = 'block';
-            loadAdminMessages(name);
+            loadMsgs(name);
+            chatInt = setInterval(() => loadMsgs(name), 3000);
         }
 
-        function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; }
+        function closeEdit() { document.getElementById('editOverlay').style.display = 'none'; clearInterval(chatInt); }
 
-        async function updateUser() {
-            const data = {
-                payment: document.getElementById('editPayment').value,
-                startDate: document.getElementById('editDate').value,
-                foodPlan: document.getElementById('editFood').value,
-                gymPlan: document.getElementById('editGym').value,
-                duration: allUsers[currentEdit].duration || "30"
-            };
-            await fetch(`${dbURL}/users/${encodeURIComponent(currentEdit)}.json`, { method: 'PATCH', body: JSON.stringify(data) });
-            alert("تم التحديث!");
-            closeEdit(); loadUsers();
-        }
-
-        async function deleteUser() {
-            if(confirm("هل أنت متأكد من حذف هذا البطل نهائياً؟")) {
-                await fetch(`${dbURL}/users/${encodeURIComponent(currentEdit)}.json`, { method: 'DELETE' });
-                await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'DELETE' }); // حذف الرسايل كمان
-                closeEdit(); loadUsers();
-            }
-        }
-
-        // --- نظام المراسلة ---
-        async function sendMsg() {
+        async function sendAdminMsg() {
             const text = document.getElementById('adminMsgText').value.trim();
             if(!text) return;
-            const msgData = {
-                sender: "admin",
-                text: text,
-                time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'})
-            };
-            await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'POST', body: JSON.stringify(msgData) });
+            const msg = { sender: "admin", text: text, time: new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'}) };
+            await fetch(`${dbURL}/messages/${encodeURIComponent(currentEdit)}.json`, { method: 'POST', body: JSON.stringify(msg) });
             document.getElementById('adminMsgText').value = '';
-            loadAdminMessages(currentEdit);
         }
 
-        async function loadAdminMessages(name) {
+        async function loadMsgs(name) {
             const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
-            const data = await res.json();
+            const msgs = await res.json();
             const box = document.getElementById('adminChatBox');
-            box.innerHTML = '';
-            if(data) {
-                Object.keys(data).forEach(id => {
-                    const m = data[id];
-                    box.innerHTML += `<div style="color: ${m.sender === 'admin' ? '#ff4757' : '#2ed573'}">
-                                        <strong>${m.sender === 'admin' ? 'أنا' : 'البطل'}:</strong> ${m.text}
-                                      </div>`;
+            if(msgs) {
+                box.innerHTML = '';
+                Object.keys(msgs).forEach(id => {
+                    const m = msgs[id];
+                    box.innerHTML += `<div class="a-msg ${m.sender === 'admin' ? 'from-admin' : 'from-user'}">${m.text}</div>`;
                 });
                 box.scrollTop = box.scrollHeight;
-            } else {
-                box.innerHTML = '<p style="color:#666">لا توجد رسائل سابقة</p>';
             }
         }
     </script>

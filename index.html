@@ -5,21 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة أبطال فينوم جيم 👑</title>
     <style>
-        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; }
+        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; --user-msg: #202c33; --admin-msg: #005c4b; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { font-size: 28px; font-weight: bold; color: var(--main); margin-bottom: 30px; border-bottom: 2px solid var(--main); display: inline-block; padding: 0 10px; }
         .card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
-        button { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; }
+        input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #444; background: #222; color: white; font-size: 16px; outline: none; }
+        button { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
         .info-box { display: none; margin-top: 25px; text-align: right; }
-        .stat-card { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 5px solid var(--main); position: relative; }
-        .status-badge { display: inline-block; padding: 5px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; }
-        .paid { background: var(--green); color: black; }
-        .unpaid { background: var(--main); color: white; }
-        #chatBox { max-height: 200px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .msg { padding: 8px 12px; border-radius: 10px; font-size: 14px; max-width: 85%; width: fit-content; }
-        .admin-msg { background: var(--main); align-self: flex-start; border-bottom-right-radius: 2px; }
-        .user-msg { background: #444; align-self: flex-end; border-bottom-left-radius: 2px; }
+        .stat-card { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 5px solid var(--main); }
+        
+        /* تصميم الشات الاحترافي */
+        #chatBox { height: 250px; overflow-y: auto; display: flex; flex-direction: column; padding: 10px; background: #0d1418; border-radius: 10px; gap: 8px; margin-bottom: 10px; border: 1px solid #333; }
+        .msg { max-width: 80%; padding: 8px 12px; border-radius: 12px; font-size: 14px; position: relative; line-height: 1.4; }
+        .admin-msg { background: var(--admin-msg); align-self: flex-start; border-top-right-radius: 2px; text-align: right; }
+        .user-msg { background: var(--user-msg); align-self: flex-end; border-top-left-radius: 2px; text-align: left; }
+        .time { font-size: 10px; opacity: 0.6; display: block; margin-top: 4px; }
+        .chat-input-area { display: flex; gap: 5px; }
     </style>
 </head>
 <body>
@@ -28,7 +29,6 @@
 
     <div class="card" id="loginBox">
         <h3 style="margin-top:0">دخول الأبطال 🔥</h3>
-        <p style="color:#aaa; font-size:14px">سجل اسمك مرة واحدة فقط لمتابعة نظامك</p>
         <input type="text" id="userName" placeholder="اكتب اسمك هنا...">
         <button onclick="fetchData()">عرض برنامجي 🚀</button>
     </div>
@@ -36,27 +36,26 @@
     <div id="infoBox" class="info-box">
         <div class="card">
             <h2 id="displayName" style="margin:0 0 10px 0; color:var(--main)"></h2>
-            <div id="paymentBadge" class="status-badge"></div>
+            <div id="paymentBadge" style="margin-bottom:10px; font-weight:bold;"></div>
             
             <div class="stat-card" style="border-right-color: #ffa502;">
-                <strong>⏳ مدة الاشتراك:</strong>
-                <p id="daysLeft" style="margin:5px 0 0 0; font-size:20px; font-weight:bold;"></p>
+                <strong>⏳ متبقي:</strong> <span id="daysLeft"></span>
             </div>
 
             <div class="stat-card">
-                <strong>🥗 نظام التغذية:</strong>
-                <p id="foodResult" style="white-space: pre-wrap; margin-top:5px; color:#ccc;"></p>
+                <strong>🥗 التغذية:</strong> <p id="foodResult" style="white-space: pre-wrap; margin:5px 0;"></p>
             </div>
 
             <div class="stat-card" style="border-right-color: #1e90ff;">
-                <strong>💪 برنامج التمرين:</strong>
-                <p id="gymResult" style="white-space: pre-wrap; margin-top:5px; color:#ccc;"></p>
+                <strong>💪 التمرين:</strong> <p id="gymResult" style="white-space: pre-wrap; margin:5px 0;"></p>
             </div>
 
             <div class="stat-card" style="border-right-color: var(--purple);">
-                <strong>💬 رسائل الكابتن أسامة:</strong>
-                <div id="chatBox">
-                    <p style="color:#888; font-size:14px; text-align:center;">لا توجد رسائل حالياً..</p>
+                <strong>💬 دردشة مع الكابتن أسامة</strong>
+                <div id="chatBox"></div>
+                <div class="chat-input-area">
+                    <input type="text" id="userMsgText" placeholder="اكتب ردك..." style="margin:0; flex:1;">
+                    <button onclick="sendUserMsg()" style="width: 70px; background: var(--purple); padding:0;">إرسال</button>
                 </div>
             </div>
 
@@ -68,7 +67,6 @@
         const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
         let currentUserName = "";
 
-        // فحص لو الاسم متخزن قبل كدة
         window.onload = () => {
             const saved = localStorage.getItem('gymUser');
             if(saved) { document.getElementById('userName').value = saved; fetchData(); }
@@ -77,63 +75,55 @@
         async function fetchData() {
             const name = document.getElementById('userName').value.trim();
             if(!name) return;
-
             try {
                 const res = await fetch(`${dbURL}/users/${encodeURIComponent(name)}.json`);
                 const data = await res.json();
-
-                if(!data) return alert("الاسم ده مش مسجل عندنا يا بطل!");
-
+                if(!data) return alert("الاسم غير مسجل!");
                 currentUserName = name;
                 localStorage.setItem('gymUser', name);
-
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('infoBox').style.display = 'block';
-
-                document.getElementById('displayName').innerText = `البطل: ${name}`;
-                document.getElementById('foodResult').innerText = data.foodPlan || "سيتم إضافة النظام قريباً";
-                document.getElementById('gymResult').innerText = data.gymPlan || "سيتم إضافة التمرين قريباً";
-
-                // حسبة الأيام
+                document.getElementById('displayName').innerText = name;
+                document.getElementById('foodResult').innerText = data.foodPlan || "قريباً";
+                document.getElementById('gymResult').innerText = data.gymPlan || "قريباً";
+                
                 const start = new Date(data.startDate);
                 const end = new Date(start);
                 end.setDate(end.getDate() + parseInt(data.duration || 30));
                 const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
-                document.getElementById('daysLeft').innerText = diff > 0 ? `متبقي ${diff} يوم` : "اشتراكك منتهي ⚠️";
+                document.getElementById('daysLeft').innerText = `${diff} يوم`;
                 
-                // حالة الدفع
-                const pBadge = document.getElementById('paymentBadge');
-                pBadge.innerText = data.payment === 'paid' ? "اشتراك ساري ✅" : "برجاء مراجعة الكابتن للدفع ❌";
-                pBadge.className = `status-badge ${data.payment === 'paid' ? 'paid' : 'unpaid'}`;
-
-                // تشغيل مراقب الرسائل
                 listenToMessages(name);
+            } catch (e) { alert("خطأ في الاتصال!"); }
+        }
 
-            } catch (e) { alert("حدث خطأ في الاتصال!"); }
+        async function sendUserMsg() {
+            const text = document.getElementById('userMsgText').value.trim();
+            if(!text) return;
+            const msgData = { sender: "user", text: text, time: new Date().toLocaleTimeString('ar-EG', {hour: '2-digit', minute:'2-digit'}) };
+            await fetch(`${dbURL}/messages/${encodeURIComponent(currentUserName)}.json`, { method: 'POST', body: JSON.stringify(msgData) });
+            document.getElementById('userMsgText').value = '';
         }
 
         async function listenToMessages(name) {
-            // تحديث الرسايل كل 5 ثواني
             setInterval(async () => {
-                try {
-                    const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
-                    const msgs = await res.json();
-                    const chatBox = document.getElementById('chatBox');
-
-                    if (msgs) {
-                        chatBox.innerHTML = '';
-                        Object.keys(msgs).forEach(id => {
-                            const m = msgs[id];
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = `msg ${m.sender === 'admin' ? 'admin-msg' : 'user-msg'}`;
-                            msgDiv.innerHTML = `<strong>${m.text}</strong><br><small style="font-size:10px; opacity:0.7;">${m.time}</small>`;
-                            chatBox.appendChild(msgDiv);
-                        });
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
-                } catch (e) { console.error("خطأ في تحديث الشات"); }
-            }, 5000);
+                const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
+                const msgs = await res.json();
+                const box = document.getElementById('chatBox');
+                if (msgs) {
+                    box.innerHTML = '';
+                    Object.keys(msgs).forEach(id => {
+                        const m = msgs[id];
+                        const div = document.createElement('div');
+                        div.className = `msg ${m.sender === 'admin' ? 'admin-msg' : 'user-msg'}`;
+                        div.innerHTML = `${m.text} <span class="time">${m.time}</span>`;
+                        box.appendChild(div);
+                    });
+                    box.scrollTop = box.scrollHeight;
+                }
+            }, 3000);
         }
     </script>
 </body>
 </html>
+

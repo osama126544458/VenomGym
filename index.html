@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوابة أبطال فينوم جيم 👑</title>
     <style>
-        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; }
+        :root { --main: #ff4757; --dark: #0a0a0a; --card: #1a1a1a; --green: #2ed573; --purple: #9b59b6; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--dark); color: white; margin: 0; padding: 20px; text-align: center; }
         .logo { font-size: 28px; font-weight: bold; color: var(--main); margin-bottom: 30px; border-bottom: 2px solid var(--main); display: inline-block; padding: 0 10px; }
         .card { background: var(--card); padding: 25px; border-radius: 20px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         input { width: 100%; padding: 15px; margin: 15px 0; border-radius: 12px; border: 1px solid #444; background: #222; color: white; font-size: 18px; text-align: center; outline: none; }
         button { background: var(--main); color: white; border: none; padding: 15px; width: 100%; border-radius: 12px; font-weight: bold; font-size: 18px; cursor: pointer; transition: 0.3s; }
         .info-box { display: none; margin-top: 25px; text-align: right; }
-        .stat-card { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 5px solid var(--main); }
+        .stat-card { background: #222; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-right: 5px solid var(--main); position: relative; }
         .status-badge { display: inline-block; padding: 5px 12px; border-radius: 6px; font-weight: bold; margin-bottom: 10px; }
         .paid { background: var(--green); color: black; }
         .unpaid { background: var(--main); color: white; }
+        #chatBox { max-height: 200px; overflow-y: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+        .msg { padding: 8px 12px; border-radius: 10px; font-size: 14px; max-width: 85%; width: fit-content; }
+        .admin-msg { background: var(--main); align-self: flex-start; border-bottom-right-radius: 2px; }
+        .user-msg { background: #444; align-self: flex-end; border-bottom-left-radius: 2px; }
     </style>
 </head>
 <body>
@@ -49,12 +53,20 @@
                 <p id="gymResult" style="white-space: pre-wrap; margin-top:5px; color:#ccc;"></p>
             </div>
 
+            <div class="stat-card" style="border-right-color: var(--purple);">
+                <strong>💬 رسائل الكابتن أسامة:</strong>
+                <div id="chatBox">
+                    <p style="color:#888; font-size:14px; text-align:center;">لا توجد رسائل حالياً..</p>
+                </div>
+            </div>
+
             <button onclick="location.reload()" style="background:#444; margin-top:10px;">خروج ⬅️</button>
         </div>
     </div>
 
     <script>
-        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com/users";
+        const dbURL = "https://osamagymapp-default-rtdb.firebaseio.com";
+        let currentUserName = "";
 
         // فحص لو الاسم متخزن قبل كدة
         window.onload = () => {
@@ -67,42 +79,60 @@
             if(!name) return;
 
             try {
-                const res = await fetch(`${dbURL}/${name}.json`);
+                const res = await fetch(`${dbURL}/users/${encodeURIComponent(name)}.json`);
                 const data = await res.json();
 
                 if(!data) return alert("الاسم ده مش مسجل عندنا يا بطل!");
 
-                // حفظ الاسم في الموبايل
+                currentUserName = name;
                 localStorage.setItem('gymUser', name);
 
-                // إخفاء الدخول وإظهار البيانات
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('infoBox').style.display = 'block';
 
-                // تعبئة البيانات
                 document.getElementById('displayName').innerText = `البطل: ${name}`;
                 document.getElementById('foodResult').innerText = data.foodPlan || "سيتم إضافة النظام قريباً";
                 document.getElementById('gymResult').innerText = data.gymPlan || "سيتم إضافة التمرين قريباً";
 
-                // حساب الأيام
+                // حسبة الأيام
                 const start = new Date(data.startDate);
                 const end = new Date(start);
-                end.setDate(end.getDate() + parseInt(data.duration));
+                end.setDate(end.getDate() + parseInt(data.duration || 30));
                 const diff = Math.ceil((end - new Date()) / (1000 * 60 * 60 * 24));
-                
                 document.getElementById('daysLeft').innerText = diff > 0 ? `متبقي ${diff} يوم` : "اشتراكك منتهي ⚠️";
                 
                 // حالة الدفع
                 const pBadge = document.getElementById('paymentBadge');
-                if(data.payment === 'paid') {
-                    pBadge.innerText = "اشتراك ساري ✅";
-                    pBadge.className = "status-badge paid";
-                } else {
-                    pBadge.innerText = "برجاء مراجعة الكابتن للدفع ❌";
-                    pBadge.className = "status-badge unpaid";
-                }
+                pBadge.innerText = data.payment === 'paid' ? "اشتراك ساري ✅" : "برجاء مراجعة الكابتن للدفع ❌";
+                pBadge.className = `status-badge ${data.payment === 'paid' ? 'paid' : 'unpaid'}`;
+
+                // تشغيل مراقب الرسائل
+                listenToMessages(name);
 
             } catch (e) { alert("حدث خطأ في الاتصال!"); }
+        }
+
+        async function listenToMessages(name) {
+            // تحديث الرسايل كل 5 ثواني
+            setInterval(async () => {
+                try {
+                    const res = await fetch(`${dbURL}/messages/${encodeURIComponent(name)}.json`);
+                    const msgs = await res.json();
+                    const chatBox = document.getElementById('chatBox');
+
+                    if (msgs) {
+                        chatBox.innerHTML = '';
+                        Object.keys(msgs).forEach(id => {
+                            const m = msgs[id];
+                            const msgDiv = document.createElement('div');
+                            msgDiv.className = `msg ${m.sender === 'admin' ? 'admin-msg' : 'user-msg'}`;
+                            msgDiv.innerHTML = `<strong>${m.text}</strong><br><small style="font-size:10px; opacity:0.7;">${m.time}</small>`;
+                            chatBox.appendChild(msgDiv);
+                        });
+                        chatBox.scrollTop = chatBox.scrollHeight;
+                    }
+                } catch (e) { console.error("خطأ في تحديث الشات"); }
+            }, 5000);
         }
     </script>
 </body>
